@@ -9,7 +9,7 @@ import UIKit
 
 class ViewController: UIViewController {
 	private let tableView = UITableView()
-	private var bossBabies: [BossBaby] = []
+	private var posts: [Post] = []
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -25,8 +25,8 @@ class ViewController: UIViewController {
 		navigationItem.leftBarButtonItem?.tintColor = .systemCyan
 		navigationItem.rightBarButtonItem = editButtonItem
 		
-		populateBossBabies()
 		setupTableView()
+		getPosts()
 	}
 	
 	override func setEditing(_ editing: Bool, animated: Bool) {
@@ -35,17 +35,22 @@ class ViewController: UIViewController {
 	}
 	
 	@objc
-	private func changeLanguage() {
-		//TODO: - Implement language change
+	private func getPosts() {
+		NetworkManager.shared.fetchPosts { [weak self] posts in
+			guard let self else { return }
+			
+			self.posts = posts
+			
+			// Perform UI update on main thread
+			DispatchQueue.main.async {
+				self.tableView.reloadData()
+			}
+		}
 	}
 	
-	private func populateBossBabies() {
-		let name: String = "Boss Baby"
-		let imageName: String = "baby"
-		
-		for i in 1...100 {
-			bossBabies.append(BossBaby(name: "\(name) - \(i)", image: imageName))
-		}
+	@objc
+	private func changeLanguage() {
+		print("I was clicked...")
 	}
 	
 	private func setupTableView() {
@@ -73,22 +78,22 @@ extension ViewController: UITableViewDelegate {
 
 extension ViewController: UITableViewDataSource {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return bossBabies.count
+		return posts.count
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		guard let cell = tableView.dequeueReusableCell(withIdentifier: BBTableViewCell.reuse, for: indexPath) as? BBTableViewCell else { return UITableViewCell() }
 		
 		cell.selectionStyle = .default
-		cell.configure(with: bossBabies[indexPath.row])
+		cell.configure(with: posts[indexPath.row])
 		
 		return cell
 	}
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		let selectedRow = bossBabies[indexPath.row]
+		let selectedRow = posts[indexPath.row]
 		let detailsVC = ShowDetailsVC()
-		detailsVC.selectedText = selectedRow.name
+		detailsVC.selectedText = selectedRow.title
 		
 		navigationController?.pushViewController(detailsVC, animated: true)
 		tableView.deselectRow(at: indexPath, animated: true)
@@ -100,13 +105,13 @@ extension ViewController: UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
 		if editingStyle == .delete {
-			bossBabies.remove(at: indexPath.row)
+			posts.remove(at: indexPath.row)
 			tableView.deleteRows(at: [indexPath], with: .fade)
 		}
 	}
 	
 	func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-		let movedRow = bossBabies.remove(at: sourceIndexPath.row)
-		bossBabies.insert(movedRow, at: destinationIndexPath.row)
+		let movedRow = posts.remove(at: sourceIndexPath.row)
+		posts.insert(movedRow, at: destinationIndexPath.row)
 	}
 }
