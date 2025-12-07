@@ -33,3 +33,9 @@
 - [ ] Swift Concurrency, Race conditions
 - [ ] Logging and Analytics (Any Firebase alternative)
 - [ ] Basics of iOS Security
+
+---
+
+## Libraries and Frameworks used:
+
+- [x] Alamofire - Networking
