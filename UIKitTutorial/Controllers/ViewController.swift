@@ -8,6 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
+	// MARK: - UI properties
 	private let tableView = UITableView()
 	private var posts: [Post] = []
 	
@@ -20,13 +21,13 @@ class ViewController: UIViewController {
 			image: UIImage(systemName: "globe"),
 			style: .plain,
 			target: self,
-			action: #selector(changeLanguage)
+			action: #selector(goToCollectionView)
 		)
 		navigationItem.leftBarButtonItem?.tintColor = .systemCyan
 		navigationItem.rightBarButtonItem = editButtonItem
 		
-		setupTableView()
 		getPosts()
+		setupTableView()
 	}
 	
 	override func setEditing(_ editing: Bool, animated: Bool) {
@@ -49,8 +50,10 @@ class ViewController: UIViewController {
 	}
 	
 	@objc
-	private func changeLanguage() {
-		print("I was clicked...")
+	private func goToCollectionView() {
+		let collectionVC = CollectionViewController()
+		
+		navigationController?.pushViewController(collectionVC, animated: true)
 	}
 	
 	private func setupTableView() {
@@ -70,9 +73,10 @@ class ViewController: UIViewController {
 	}
 }
 
+// MARK: - VC extends ViewTable
 extension ViewController: UITableViewDelegate {
 	func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-		return 120
+		return 180
 	}
 }
 
