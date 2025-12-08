@@ -22,7 +22,7 @@
 	- [ ] Reset password
 - [ ] Persistance(GRDB)
 - [ ] Testing
-	- [ ] Unit Testing
+	- [ ] XCTest - Unit Testing
 	- [ ] UI Testing
 - [ ] Basics of Localization
 - [ ] Basics of Profiling

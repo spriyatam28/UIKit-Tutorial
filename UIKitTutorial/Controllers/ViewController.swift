@@ -10,7 +10,7 @@ import UIKit
 class ViewController: UIViewController {
 	// MARK: - UI properties
 	private let tableView = UITableView()
-	private var posts: [Post] = []
+	private var posts: [Post]? = []
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -26,6 +26,13 @@ class ViewController: UIViewController {
 		navigationItem.leftBarButtonItem?.tintColor = .systemCyan
 		navigationItem.rightBarButtonItem = editButtonItem
 		
+		do {
+			posts = try PostRepository.shared.fetchAll()
+			tableView.reloadData()
+		} catch {
+			print("Error: \(error.localizedDescription)")
+		}
+		
 		getPosts()
 		setupTableView()
 	}
@@ -40,13 +47,24 @@ class ViewController: UIViewController {
 		NetworkManager.shared.fetchPosts { [weak self] posts in
 			guard let self else { return }
 			
+			// Save to DB
+			do {
+				try PostRepository.shared.insertAll(posts)
+				print("successfully inserted all posts into the db")
+			} catch {
+				print("DB error: \(error.localizedDescription)")
+			}
+			
 			self.posts = posts
 			
-			// Perform UI update on main thread
 			DispatchQueue.main.async {
 				self.tableView.reloadData()
 			}
 		}
+	}
+	
+	private func showAnimation(named name: String, loop: Bool = false) {
+		
 	}
 	
 	@objc
@@ -82,20 +100,20 @@ extension ViewController: UITableViewDelegate {
 
 extension ViewController: UITableViewDataSource {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return posts.count
+		return posts?.count ?? 0
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		guard let cell = tableView.dequeueReusableCell(withIdentifier: BBTableViewCell.reuse, for: indexPath) as? BBTableViewCell else { return UITableViewCell() }
 		
 		cell.selectionStyle = .default
-		cell.configure(with: posts[indexPath.row])
+		cell.configure(with: posts![indexPath.row])
 		
 		return cell
 	}
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		let selectedRow = posts[indexPath.row]
+		let selectedRow = posts![indexPath.row]
 		let detailsVC = ShowDetailsVC()
 		detailsVC.selectedText = selectedRow.title
 		
@@ -109,13 +127,13 @@ extension ViewController: UITableViewDataSource {
 	
 	func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
 		if editingStyle == .delete {
-			posts.remove(at: indexPath.row)
+			posts!.remove(at: indexPath.row)
 			tableView.deleteRows(at: [indexPath], with: .fade)
 		}
 	}
 	
 	func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-		let movedRow = posts.remove(at: sourceIndexPath.row)
-		posts.insert(movedRow, at: destinationIndexPath.row)
+		let movedRow = posts!.remove(at: sourceIndexPath.row)
+		posts!.insert(movedRow, at: destinationIndexPath.row)
 	}
 }

@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import GRDB
 
-struct Post: Codable, Sendable {
+struct Post: Codable, FetchableRecord, PersistableRecord, Identifiable {
 	let userId: Int
 	let id: Int
 	let title: String
