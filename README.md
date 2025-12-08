@@ -39,3 +39,4 @@
 ## Libraries and Frameworks used:
 
 - [x] Alamofire - Networking
+- [x] Explore GRDB - SQLite Database for persistence
